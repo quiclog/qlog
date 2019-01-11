@@ -2,8 +2,6 @@
 // Interface for QLog version 0.1
 // ================================================================== //
 
-import {FrameTypeName} from "./QUIC";
-
 export interface IQLog {
     qlog_version: string,
     quic_version: string,
@@ -19,6 +17,42 @@ export interface IQLog {
         ConnectivityEventTrigger | TransporEventTrigger | SecurityEventTrigger,
         IEventData
         ][]
+}
+
+// ================================================================== //
+// Based on QUIC draft 16
+// ================================================================== //
+
+export enum FrameTypeName {
+    PADDING = "PADDING",
+    RST_STREAM = "RST_STREAM",
+    CONNECTION_CLOSE = "CONNECTION_CLOSE",
+    APPLICATION_CLOSE = "APPLICATION_CLOSE",
+    MAX_DATA = "MAX_DATA",
+    MAX_STREAM_DATA = "MAX_STREAM_DATA",
+    MAX_STREAM_ID = "MAX_STREAM_ID",
+    PING = "PING",
+    BLOCKED = "BLOCKED",
+    STREAM_BLOCKED = "STREAM_BLOCKED",
+    STREAM_ID_BLOCKED = "STREAM_ID_BLOCKED",
+    NEW_CONNECTION_ID = "NEW_CONNECTION_ID",
+    STOP_SENDING = "STOP_SENDING",
+    RETIRE_CONNECTION_ID = "RETIRE_CONNECTION_ID",
+    PATH_CHALLENGE = "PATCH_CHALLENGE",
+    PATH_RESPONSE = "PATH_RESPONSE",
+    STREAM = "STREAM",
+    CRYPTO = "CRYPTO",
+    NEW_TOKEN = "NEW TOKEN",
+    ACK = "ACK",
+    UNKNOWN_FRAME_TYPE = "UNKOWN_FRAME_TYPE",
+}
+
+export enum PacketType {
+    INITIAL = "Initial",
+    RETRY = "Retry",
+    HANDSHAKE = "Handshake",
+    ZERORTTPROTECTED = "0-RTT Protected",
+    UNKOWN_PACKET_TYPE = "UNKOWN PACKET TYPE"
 }
 
 // ================================================================== //
