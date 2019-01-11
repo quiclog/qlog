@@ -9,15 +9,19 @@ export interface IQLog {
     connectionid: string,
     starttime: number,
     fields: string[],
-    //TODO
-    events: [
-        number,
-        EventCategory,
-        ConnectivityEventType | TransportEventType | SecurityEventType,
-        ConnectivityEventTrigger | TransporEventTrigger | SecurityEventTrigger,
-        IEventData
-        ][]
+    events: Array<IEventTuple>
 }
+
+export type EventType = ConnectivityEventType | TransportEventType | SecurityEventType;
+export type EventTrigger = ConnectivityEventTrigger | TransporEventTrigger | SecurityEventTrigger;
+
+export interface IEventTuple {
+    0 : number,
+    1 : EventCategory,
+    2 : EventType,
+    3 : EventTrigger,
+    4 : EventData
+} 
 
 // ================================================================== //
 // Based on QUIC draft 16
@@ -108,11 +112,9 @@ export enum SSLSecrets {
 // Data Interfaces for QLog Events
 // ================================================================== //
 
-export interface IEventData {
+export type EventData = IEventNewConnection | IEventKeyUpdate | IEventPacketRX;
 
-}
-
-export interface IEventNewConnection extends IEventData {
+export interface IEventNewConnection {
     ip_version: string,
     //TODO more restrictive types for IP?
     srcip: string,
@@ -123,32 +125,33 @@ export interface IEventNewConnection extends IEventData {
 
 // ================================================================== //
 
-export interface IEventKeyUpdate extends IEventData {
+export interface IEventKeyUpdate {
     name: SSLSecrets,
     key: string
 }
 
 // ================================================================== //
 
-export interface IEventPacketRX extends IEventData {
+export interface IEventPacketRX {
     raw_encrypted?: string
-    header?: IEventPacketRXHeader,
-    frames?: any[]
+    header?: IPacketHeader,
+    frames?: Array<IPacketFrame>
 }
 
-export interface IEventPacketRXHeader {
+// TODO: potentially split in LongHeader and ShortHeader explicitly? 
+export interface IPacketHeader {
     form: string,
-    type: string,
-    version: string,
-    scil: string,
-    dcil: string,
-    scid: string,
+    type: PacketType,
+    version?: string,
+    scil?: string,
+    dcil?: string,
+    scid?: string,
     dcid: string,
     payload_length: number,
     packet_number: string
 }
 
-export interface IEventPacketRXFrame {
+export interface IPacketFrame {
     type: FrameTypeName,
     length: number
 }
