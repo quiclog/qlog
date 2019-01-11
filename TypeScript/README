@@ -1,0 +1,9 @@
+This TypeScript schema is published on NPM as @quictools/qlog-schema
+
+npm install @quictools/qlog-schema
+
+and then use it in your TypeScript files with:
+import * as qlog from '@quictools/qlog-schema'
+
+You can then load qlog files and cast the root json object to qlog.IQLog to get autocomplete etc.
+

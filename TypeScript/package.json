@@ -1,8 +1,9 @@
 {
 	"name": "@quictools/qlog-schema",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"description": "TypeScript schema for the qlog specification, providing logging for the QUIC and HTTP/3 network protocols.",
 	"license": "MIT",
+	"types" : "index.ts",
 	"author": "Hasselt University - EDM - QUIC Research",
 	"email": "robin.marx@uhasselt.be",
 	"repository": "quiclog/qlog",
