@@ -12,8 +12,8 @@ export interface IQLog {
     events: Array<IEventTuple>
 }
 
-export type EventType = ConnectivityEventType | TransportEventType | SecurityEventType;
-export type EventTrigger = ConnectivityEventTrigger | TransporEventTrigger | SecurityEventTrigger;
+export type EventType = ConnectivityEventType | TransportEventType | SecurityEventType | RecoveryEventType;
+export type EventTrigger = ConnectivityEventTrigger | TransporEventTrigger | SecurityEventTrigger | RecoveryEventTrigger;
 
 export interface IEventTuple {
     0 : number,
@@ -56,7 +56,7 @@ export enum PacketType {
     RETRY = "Retry",
     HANDSHAKE = "Handshake",
     ZERORTTPROTECTED = "0-RTT Protected",
-    UNKOWN_PACKET_TYPE = "UNKOWN PACKET TYPE"
+    UNKOWN_PACKET_TYPE = "UNKOWN PACKET TYPE",
 }
 
 // ================================================================== //
@@ -65,6 +65,7 @@ export enum EventCategory {
     CONNECTIVITY = "CONNECTIVITY",
     SECURITY = "SECURITY",
     TRANSPORT = "TRANSPORT",
+    RECOVERY = "RECOVERY",
 }
 
 export enum ConnectivityEventType {
@@ -72,23 +73,44 @@ export enum ConnectivityEventType {
 }
 
 export enum ConnectivityEventTrigger {
-    LINE = "LINE"
+    LINE = "LINE",
 }
 
 export enum TransportEventType {
     TRANSPORT_PACKET_RX = "PACKET_RX",
+    STREAM_NEW = "STREAM_NEW",
+    ACK_NEW = "ACK_NEW",
+    MAXDATA_NEW = "MAXDATA_NEW",
+    MAXSTREAMDATA_NEW = "MAXSTREAMDATA_NEW",
 }
 
 export enum TransporEventTrigger {
-    LINE = "LINE"
+    LINE = "LINE",
+    PACKET_TX = "PACKET_TX",
+    PACKET_RX = "PACKET_RX",
 }
 
 export enum SecurityEventType {
-    KEY_UPDATE = "KEY_UPDATE"
+    KEY_UPDATE = "KEY_UPDATE",
 }
 
 export enum SecurityEventTrigger {
     KEYLOG = "KEYLOG",
+}
+
+export enum RecoveryEventType {
+    LOSS_DETECTION_ARMED = "LOSS_DETECTION_ARMED",
+    LOSS_DETECTION_POSTPONED = "LOSS_DETECTION_POSTPONED",
+    LOSS_DETECTION_TRIGGERED = "LOSS_DETECTION_TRIGGERED",
+    BYTES_IN_FLIGHT_UPDATE = "BYTES_IN_FLIGHT_UPDATE",
+    CWND_UPDATE = "CWND_UPDATE",
+    RTT_UPDATE = "RTT_UPDATE",
+}
+
+export enum RecoveryEventTrigger {
+    ACK_RX = "ACK_RX",
+    PACKET_RX = "PACKET_RX",
+    UNKNOWN = "UNKNOWN",
 }
 
 
@@ -97,7 +119,7 @@ export enum SecurityEventTrigger {
 export enum VantagePoint {
     CLIENT = "CLIENT",
     SERVER = "SERVER",
-    NETWORK = "NETWORK"
+    NETWORK = "NETWORK",
 }
 
 export enum SSLSecrets {
@@ -105,7 +127,7 @@ export enum SSLSecrets {
     QUIC_CLIENT_HANDSHAKE_TRAFFIC_SECRET = "QUIC_CLIENT_HANDSHAKE_TRAFFIC_SECRET",
     QUIC_SERVER_TRAFFIC_SECRET = "QUIC_SERVER_TRAFFIC_SECRET",
     QUIC_CLIENT_TRAFFIC_SECRET = "QUIC_CLIENT_TRAFFIC_SECRET",
-    ADDITIONAL_SECRET = "ADDITIONAL_SECRET"
+    ADDITIONAL_SECRET = "ADDITIONAL_SECRET",
 }
 
 // ================================================================== //
