@@ -4,12 +4,18 @@
 
 export interface IQLog {
     qlog_version: string,
+    connections: Array<IConnection>,
+    description?: string
+}
+
+export interface IConnection {
     quic_version: string,
     vantagepoint: VantagePoint,
+    metadata?: any, // TODO: possibly best to make this any POJO? will usually be a string description? 
     connectionid: string,
     starttime: number,
     fields: string[],
-    events: Array<IEventTuple>
+    events: Array<IEventTuple>, 
 }
 
 export type EventType = ConnectivityEventType | TransportEventType | SecurityEventType | RecoveryEventType;
