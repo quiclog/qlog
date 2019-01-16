@@ -6,6 +6,7 @@
 // import * as qlog from '@quictools/qlog-schema/draft-16/QLog' 
 export { 
         IQLog, 
+        IConnection,
         FrameTypeName, 
         PacketType, 
         EventCategory, 
@@ -17,6 +18,8 @@ export {
         TransporEventTrigger,
         SecurityEventType,
         SecurityEventTrigger,
+        RecoveryEventType,
+        RecoveryEventTrigger,
         SSLSecrets,
         VantagePoint,
         EventData,
