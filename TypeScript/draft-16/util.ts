@@ -8,7 +8,7 @@ import { PacketType, FrameTypeName, IEventTuple, EventCategory, EventType, Event
 //      evtw.evt = newEvt;
 // or :
 //      EventTupleWrapper.time(evt) 
-class EventTupleWrapper{
+export class EventTupleWrapper{
     public evt!:IEventTuple;
 
     constructor(evt:IEventTuple | null){
