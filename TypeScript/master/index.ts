@@ -3,7 +3,8 @@
 // using the latest version is as simple as
 // import * as qlog from "@quictools/qlog-schema" OR import { IQLog } from "@quictools/qlog-schema"
 // using a specific version (E.g., draft-16) is then:
-// import * as qlog from '@quictools/qlog-schema/draft-16/QLog' 
+// import * as qlog from '@quictools/qlog-schema/dist/draft-16/QLog' 
+// DO NOT FORGET THE dist/ : we need to directly reference the compiled .js file. This is only automagically done for the index.ts file in the root dir. 
 export { 
         IQLog, 
         IConnection,
