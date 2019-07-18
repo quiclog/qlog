@@ -1,5 +1,5 @@
 // ================================================================== //
-// Interface for QLog version 0.1
+// Interface for QLog version pre-00, for quic draft 16
 // ================================================================== //
 
 export interface IQLog {
