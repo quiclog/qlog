@@ -10,7 +10,12 @@ export interface IQLog {
     description?: string,
     summary?:any,
 
-    traces: Array<ITrace>
+    traces: Array<ITrace | IError>
+}
+
+export interface IError {
+    error_description: string,
+    uri: string,
 }
 
 export interface ITrace {
@@ -23,24 +28,26 @@ export interface ITrace {
     common_fields?: ICommonFields,
     event_fields: string[],
 
-    events: Array<EventField>
+    events: Array<Array<EventField>>
 }
 
 export interface IVantagePoint{
     name?: string,
     type: VantagePointType,
-    flow?: VantagePointType.client | VantagePointType.server // only if type === VantagePointType.NETWORK
+    flow?: VantagePointType.client | VantagePointType.server | VantagePointType.unknown // only if type === VantagePointType.NETWORK
 }
 
 export enum VantagePointType {
     client = "client",
     server = "server",
     network = "network",
+    unknown = "unknown",
 }
 
 export interface IConfiguration{
-    time_offset:number,
-    time_units:"ms"|"us"
+    time_offset:string,
+    time_units:"ms"|"us",
+    original_uris: Array<string>,
 }
 
 export interface ICommonFields{
@@ -48,9 +55,7 @@ export interface ICommonFields{
     group_ids?: Array<any>,
     protocol_type?: string,
 
-    reference_time?:number,
-    time?:number,
-    delta_time?:number,
+    reference_time?:string,
 
     [additionalUserSpecifiedProperty: string]: any // allow additional properties. This way, we can enforce proper types for the ones defined in the spec, see other properties
 }
@@ -116,7 +121,7 @@ export enum SecurityEventType {
 }
 
 export enum SecurityEventTrigger {
-    tls = "tls",
+    tls = "TLS",
     implicit = "implicit",
     remote_update = "remote_update",
     local_update = "local_update"
@@ -454,17 +459,114 @@ export interface IStreamFrame {
 //     length: number
 // }
 
+export interface IMaxStreamDataFrame{
+    frame_type:QUICFrameTypeName.max_stream_data;
+
+    id:string;
+    maximum:string;
+}
+
+export interface IMaxStreamsFrame{
+    frame_type:QUICFrameTypeName.max_streams;
+
+    maximum:string;
+}
+
+export interface IDataBlockedFrame{
+    frame_type:QUICFrameTypeName.data_blocked;
+
+    limit:string;
+}
+
+export interface IStreamDataBlockedFrame{
+    frame_type:QUICFrameTypeName.stream_data_blocked;
+
+    id:string;
+    limit:string;
+}
+
+export interface IStreamsBlockedFrame{
+    frame_type:QUICFrameTypeName.streams_blocked;
+
+    limit:string;
+}
+
+export interface INewConnectionIDFrame {
+    frame_type:QUICFrameTypeName.new_connection_id;
+
+    sequence_number:string;
+    retire_prior_to:string;
+
+    length:number;
+    connection_id:string;
+
+    reset_token:string;
+}
+
+export interface IRetireConnectionIDFrame{
+    frame_type:QUICFrameTypeName.retire_connection_id;
+
+    sequence_number:string;
+}
+
+export interface IPathChallengeFrame{
+    frame_type:QUICFrameTypeName.path_challenge;
+
+    data?:string;
+}
+
+export interface IPathResponseFrame{
+    frame_type:QUICFrameTypeName.path_response;
+
+    data?:string;
+}
+
+export type ErrorSpace = TransportError | ApplicationError;
+
+export interface IConnectionCloseFrame{
+    frame_type:QUICFrameTypeName.connection_close;
+
+    error_space:ErrorSpace;
+    error_code:TransportError | ApplicationError | number;
+    raw_error_code:number;
+    reason:string;
+
+    trigger_frame_type?:number; // TODO: should be more defined, but we don't have a FrameType enum atm...
+}
+
+export enum TransportError {
+    no_error,
+    internal_error,
+    server_busy,
+    flow_control_error,
+    stream_limit_error,
+    stream_state_error,
+    final_size_error,
+    frame_encoding_error,
+    transport_parameter_error,
+    protocol_violation,
+    invalid_migration,
+    crypto_buffer_exceeded,
+    crypto_error
+}
+
 // ================================================================== //
 
 export enum HTTP3FrameTypeName {
     data = "data",
     headers = "headers",
     priority = "priority",
+    cancel_push = "cancel_push",
     settings = "settings",
-    unknown = "unknown"
+    push_promise = "push_promise",
+    goaway = "goaway",
+    max_push_id = "max_push_id",
+    duplicate_push = "duplicate_push",
+    reserved = "reserved",
+    unknown = "unknown",
 }
 
-export type HTTP3Frame = IDataFrame | IHeadersFrame | IPriorityFrame | ISettingsFrame | IUnknownFrame;
+export type HTTP3Frame = IDataFrame | IHeadersFrame | IPriorityFrame | ICancelPushFrame | ISettingsFrame | IPushPromiseFrame | IGoAwayFrame | IMaxPushIDFrame | IDuplicatePushFrame | IReservedFrame | IUnknownFrame;
 
 export interface IDataFrame{
     frame_type:HTTP3FrameTypeName.data
@@ -494,6 +596,11 @@ export interface IPriorityFrame{
 
 }
 
+export interface ICancelPushFrame{
+    frame_type: HTTP3FrameTypeName.cancel_push,
+    id:string
+}
+
 export interface ISettingsFrame {
     frame_type:HTTP3FrameTypeName.settings,
     fields:Array<Setting>
@@ -504,6 +611,54 @@ export interface Setting{
     content:string
 }
 
+export interface IPushPromiseFrame{
+    frame_type:HTTP3FrameTypeName.push_promise,
+    id:string,
+
+    fields:Array<IHTTPHeader>
+}
+
+export interface IGoAwayFrame{
+    frame_type:HTTP3FrameTypeName.goaway,
+    id:string
+}
+
+export interface IMaxPushIDFrame{
+    frame_type:HTTP3FrameTypeName.max_push_id,
+    id:string
+}
+
+export interface IDuplicatePushFrame{
+    frame_type:HTTP3FrameTypeName.duplicate_push,
+    id:string
+}
+
+export interface IReservedFrame{
+    frame_type:HTTP3FrameTypeName.reserved,
+}
+
 export interface IUnknownFrame {
     frame_type:HTTP3FrameTypeName.unknown
+}
+
+export enum ApplicationError{
+    http_no_error,
+    http_general_protocol_error,
+    reserved,
+    http_internal_error,
+    http_request_cancelled,
+    http_incomplete_request,
+    http_connect_error,
+    http_excessive_load,
+    http_version_fallback,
+    http_wrong_stream,
+    http_id_error,
+    http_stream_creation_error,
+    http_closed_critical_stream,
+    http_early_response,
+    http_missing_settings,
+    http_unexpected_frame,
+    http_request_rejected,
+    http_settings_error,
+    http_malformed_frame
 }
