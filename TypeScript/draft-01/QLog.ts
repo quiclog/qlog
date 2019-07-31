@@ -409,7 +409,7 @@ export interface IPacketHeader {
     packet_number: string
 }
 
-export type QuicFrame = IPaddingFrame | IAckFrame | ICryptoFrame | IStreamFrame;
+export type QuicFrame = IPaddingFrame | IAckFrame | ICryptoFrame | IStreamFrame | IMaxStreamDataFrame | IMaxStreamsFrame | IDataBlockedFrame | IStreamDataBlockedFrame | IStreamsBlockedFrame | IStreamDataBlockedFrame | IStreamsBlockedFrame | INewConnectionIDFrame | IRetireConnectionIDFrame | IPathChallengeFrame | IPathResponseFrame;
 
 export interface IPaddingFrame{
     frame_type:QUICFrameTypeName.padding;
