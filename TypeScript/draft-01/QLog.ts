@@ -169,9 +169,9 @@ export enum keyType {
 // Data Interfaces for QLog Events
 // ================================================================== //
 
-export type EventData = IEventListening | IEventConnectionNew | IEventConnectionIDUpdate | IEventSpinBitUpdate | IEventConnectionClose | 
-                        IEventCipherUpdate | IEventKeyUpdate | IEventKeyRetire | 
-                        IEventDatagramReceived | IEventDatagramSent | IEventPacketReceived | IEventPacketSent | 
+export type EventData = IEventListening | IEventConnectionNew | IEventConnectionIDUpdate | IEventSpinBitUpdate | IEventConnectionClose |
+                        IEventCipherUpdate | IEventKeyUpdate | IEventKeyRetire |
+                        IEventDatagramReceived | IEventDatagramSent | IEventPacketReceived | IEventPacketSent |
                         IEventMetricUpdate | IEventPacketLost |
                         IEventH3StreamStateUpdate | IEventH3StreamTypeUpdate | IEventH3FrameCreated | IEventH3FrameParsed | IEventH3DataMoved | IEventH3DataReceived | IEventH3DependencyUpdate;
 
@@ -275,6 +275,16 @@ export enum PacketType {
     unknown = "unknown",
 }
 
+export interface IEventVersionUpdate{
+    old:string,
+    new:string
+}
+
+export interface IALPNUpdate{
+    old:string,
+    new:string,
+}
+
 // ================================================================== //
 // RECOVERY
 
@@ -296,7 +306,7 @@ export interface IEventMetricUpdate {
 export interface IEventPacketLost {
     type:PacketType,
     packet_number:string,
-    
+
     // not all implementations will keep track of full packets, so these are optional
     header?:IPacketHeader,
     frames?:Array<QuicFrame>, // see appendix for the definitions
@@ -346,7 +356,7 @@ export interface IEventH3DataMoved {
     offset_start:string,
     offset_end:string,
 
-    recipient:"application"|"transport"    
+    recipient:"application"|"transport"
 }
 
 export interface IEventH3DataReceived {
@@ -397,7 +407,7 @@ export enum QUICFrameTypeName {
     unknown_frame_type = "unkown_frame_type"
 }
 
-// TODO: potentially split in LongHeader and ShortHeader explicitly? 
+// TODO: potentially split in LongHeader and ShortHeader explicitly?
 export interface IPacketHeader {
     form: string,
     version?: string,
@@ -409,10 +419,14 @@ export interface IPacketHeader {
     packet_number: string
 }
 
-export type QuicFrame = IPaddingFrame | IAckFrame | ICryptoFrame | IStreamFrame | IMaxStreamDataFrame | IMaxStreamsFrame | IDataBlockedFrame | IStreamDataBlockedFrame | IStreamsBlockedFrame | IStreamDataBlockedFrame | IStreamsBlockedFrame | INewConnectionIDFrame | IRetireConnectionIDFrame | IPathChallengeFrame | IPathResponseFrame;
+export type QuicFrame = IPaddingFrame | IPingFrame | IAckFrame | IResetStreamFrame | IStopSendingFrame | ICryptoFrame | INewTokenFrame | IStreamFrame | IMaxDataFrame | IMaxStreamDataFrame | IMaxStreamsFrame | IDataBlockedFrame | IStreamDataBlockedFrame | IStreamsBlockedFrame | INewConnectionIDFrame | IRetireConnectionIDFrame | IPathChallengeFrame | IPathResponseFrame | IConnectionCloseFrame | IUnknownFrame;
 
 export interface IPaddingFrame{
     frame_type:QUICFrameTypeName.padding;
+}
+
+export interface IPingFrame{
+    frame_type:QUICFrameTypeName.ping;
 }
 
 export interface IAckFrame{
@@ -430,15 +444,37 @@ export interface IAckFrame{
     ce?:string;
 }
 
+export interface IResetStreamFrame{
+    frame_type:QUICFrameTypeName.reset_stream;
+
+    id:string;
+    error_code:ApplicationError | number;
+    final_size:string;
+}
+
+export interface IStopSendingFrame{
+    frame_type:QUICFrameTypeName.stop_sending;
+
+    id:string;
+    error_code:ApplicationError | number;
+}
+
 export interface ICryptoFrame{
-    frame_type:QUICFrameTypeName.crypto; 
-  
+    frame_type:QUICFrameTypeName.crypto;
+
     offset:string;
     length:string;
 }
 
+export interface INewTokenFrame{
+    frame_type:QUICFrameTypeName.new_token,
+
+    length:string,
+    token:string,
+}
+
 export interface IStreamFrame {
-    frame_type:QUICFrameTypeName.stream; 
+    frame_type:QUICFrameTypeName.stream;
 
     id:string;
 
@@ -458,6 +494,12 @@ export interface IStreamFrame {
 //     type: FrameTypeName,
 //     length: number
 // }
+
+export interface IMaxDataFrame{
+    frame_type:QUICFrameTypeName.max_data
+
+    maximum:string;
+}
 
 export interface IMaxStreamDataFrame{
     frame_type:QUICFrameTypeName.max_stream_data;
@@ -521,7 +563,10 @@ export interface IPathResponseFrame{
     data?:string;
 }
 
-export type ErrorSpace = TransportError | ApplicationError;
+export enum ErrorSpace {
+    transport_error = "transport_error",
+    application_error = "application_error",
+}
 
 export interface IConnectionCloseFrame{
     frame_type:QUICFrameTypeName.connection_close;
@@ -535,20 +580,27 @@ export interface IConnectionCloseFrame{
 }
 
 export enum TransportError {
-    no_error,
-    internal_error,
-    server_busy,
-    flow_control_error,
-    stream_limit_error,
-    stream_state_error,
-    final_size_error,
-    frame_encoding_error,
-    transport_parameter_error,
-    protocol_violation,
-    invalid_migration,
-    crypto_buffer_exceeded,
-    crypto_error
+    no_error = "no_error",
+    internal_error = "internal_error",
+    server_busy = "server_busy",
+    flow_control_error = "flow_control_error",
+    stream_limit_error = "stream_limit_error",
+    stream_state_error = "stream_state_error",
+    final_size_error = "final_size_error",
+    frame_encoding_error = "frame_encoding_error",
+    transport_parameter_error = "transport_parameter_error",
+    protocol_violation = "protocol_violation",
+    invalid_migration = "invalid_migration",
+    crypto_buffer_exceeded = "crypto_buffer_exceeded",
+    crypto_error = "crypto_error",
+    unknown = "unknown",
 }
+
+export interface IUnknownFrame{
+    frame_type:QUICFrameTypeName.unknown_frame_type;
+    raw_frame_type:number;
+}
+
 
 // ================================================================== //
 
@@ -637,28 +689,25 @@ export interface IReservedFrame{
     frame_type:HTTP3FrameTypeName.reserved,
 }
 
-export interface IUnknownFrame {
-    frame_type:HTTP3FrameTypeName.unknown
-}
-
 export enum ApplicationError{
-    http_no_error,
-    http_general_protocol_error,
-    reserved,
-    http_internal_error,
-    http_request_cancelled,
-    http_incomplete_request,
-    http_connect_error,
-    http_excessive_load,
-    http_version_fallback,
-    http_wrong_stream,
-    http_id_error,
-    http_stream_creation_error,
-    http_closed_critical_stream,
-    http_early_response,
-    http_missing_settings,
-    http_unexpected_frame,
-    http_request_rejected,
-    http_settings_error,
-    http_malformed_frame
+    http_no_error = "http_no_error",
+    http_general_protocol_error = "http_general_protocol_error",
+    reserved = "reserved",
+    http_internal_error = "http_internal_error",
+    http_request_cancelled = "http_request_cancelled",
+    http_incomplete_request = "http_incomplete_request",
+    http_connect_error = "http_connect_error",
+    http_excessive_load = "http_excessive_load",
+    http_version_fallback = "http_version_fallback",
+    http_wrong_stream = "http_wrong_stream",
+    http_id_error = "http_id_error",
+    http_stream_creation_error = "http_stream_creation_error",
+    http_closed_critical_stream = "http_closed_critical_stream",
+    http_early_response = "http_early_response",
+    http_missing_settings = "http_missing_settings",
+    http_unexpected_frame = "http_unexpected_frame",
+    http_request_rejected = "http_request_rejected",
+    http_settings_error = "http_settings_error",
+    http_malformed_frame = "http_malformed_frame",
+    unknown = "unknown",
 }
