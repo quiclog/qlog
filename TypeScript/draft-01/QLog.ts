@@ -1,5 +1,3 @@
-import { VantagePoint } from "../draft-16/QLog";
-
 // ================================================================== //
 // Interface for QLog version draft-01, initial for quic draft-22, but should be more tied to qlog than quic versions now
 // ================================================================== //
@@ -47,7 +45,8 @@ export enum VantagePointType {
 export interface IConfiguration{
     time_offset:string,
     time_units:"ms"|"us",
-    original_uris: Array<string>,
+
+    original_uris: Array<string>
 }
 
 export interface ICommonFields{
