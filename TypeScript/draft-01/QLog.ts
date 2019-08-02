@@ -8,16 +8,16 @@ export interface IQLog {
     description?: string,
     summary?:any,
 
-    traces: Array<ITrace | IError>
+    traces: Array<ITrace | ITraceError>
 }
 
-export interface IError {
+export interface ITraceError {
     error_description: string,
     uri: string,
 }
 
 export interface ITrace {
-    vantagepoint: IVantagePoint,
+    vantage_point: IVantagePoint,
     title?:string,
     description?: string,
 
@@ -43,10 +43,10 @@ export enum VantagePointType {
 }
 
 export interface IConfiguration{
-    time_offset:string,
-    time_units:"ms"|"us",
+    time_offset?:string,
+    time_units?:"ms"|"us",
 
-    original_uris: Array<string>
+    original_uris?: Array<string>
 }
 
 export interface ICommonFields{
