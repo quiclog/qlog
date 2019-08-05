@@ -408,14 +408,20 @@ export enum QUICFrameTypeName {
 
 // TODO: potentially split in LongHeader and ShortHeader explicitly?
 export interface IPacketHeader {
-    form: string,
-    version?: string,
-    scil?: string,
-    dcil?: string,
-    scid?: string,
-    dcid: string,
-    payload_length: number,
-    packet_number: string
+    packet_number: string;
+    packet_size?: number;
+    payload_length?: number;
+
+    // only if present in the header
+    // if correctly using NEW_CONNECTION_ID events,
+    // dcid can be skipped for 1RTT packets
+    version?: string;
+    scil?: string;
+    dcil?: string;
+    scid?: string;
+    dcid?: string;
+
+    // Note: short vs long header is implicit through PacketType
 }
 
 export type QuicFrame = IPaddingFrame | IPingFrame | IAckFrame | IResetStreamFrame | IStopSendingFrame | ICryptoFrame | INewTokenFrame | IStreamFrame | IMaxDataFrame | IMaxStreamDataFrame | IMaxStreamsFrame | IDataBlockedFrame | IStreamDataBlockedFrame | IStreamsBlockedFrame | INewConnectionIDFrame | IRetireConnectionIDFrame | IPathChallengeFrame | IPathResponseFrame | IConnectionCloseFrame | IUnknownFrame;
