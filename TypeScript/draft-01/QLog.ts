@@ -170,7 +170,7 @@ export enum keyType {
 
 export type EventData = IEventListening | IEventConnectionNew | IEventConnectionIDUpdate | IEventSpinBitUpdate | IEventConnectionClose |
                         IEventCipherUpdate | IEventKeyUpdate | IEventKeyRetire |
-                        IEventDatagramReceived | IEventDatagramSent | IEventPacketReceived | IEventPacketSent |
+                        IEventDatagramReceived | IEventDatagramSent | IEventPacketReceived | IEventPacketSent | IEventPacketBuffered |
                         IEventMetricUpdate | IEventPacketLost |
                         IEventH3StreamStateUpdate | IEventH3StreamTypeUpdate | IEventH3FrameCreated | IEventH3FrameParsed | IEventH3DataMoved | IEventH3DataReceived | IEventH3DependencyUpdate;
 
@@ -219,17 +219,17 @@ export interface IEventConnectionClose {
 // SECURITY
 
 export interface IEventCipherUpdate {
-    type: string
+    cipher_type: string
 }
 
 export interface IEventKeyRetire {
-    type: keyType,
+    key_type: keyType,
     key: string,
     generation?: number
 }
 
 export interface IEventKeyUpdate {
-    type: keyType,
+    key_type: keyType,
     old?: string,
     new: string,
     generation?: number
@@ -248,10 +248,22 @@ export interface IEventDatagramSent{
     byte_length:number
 }
 
+// this is not really specified in the spec
+// it represents shared fields between IEventPacketSent and IEventPacketReceived
+// (which are 100% the same at the time of writing)
+// so it's easier to handle both types of events in the same way (which is often needed)
+export interface IEventPacket {
+    raw_encrypted?: string,
+
+    packet_type: PacketType,
+    header?: IPacketHeader,
+    frames?: Array<QuicFrame>
+}
+
 export interface IEventPacketReceived {
     raw_encrypted?: string,
 
-    type: PacketType,
+    packet_type: PacketType,
     header?: IPacketHeader,
     frames?: Array<QuicFrame>
 }
@@ -259,9 +271,14 @@ export interface IEventPacketReceived {
 export interface IEventPacketSent {
     raw_encrypted?: string,
 
-    type: PacketType,
+    packet_type: PacketType,
     header?: IPacketHeader,
     frames?: Array<QuicFrame>
+}
+
+export interface IEventPacketBuffered {
+    packet_type: PacketType,
+    packet_number: string
 }
 
 export enum PacketType {
@@ -270,7 +287,7 @@ export enum PacketType {
     zerortt = "0RTT",
     onertt = "1RTT",
     retry = "retry",
-    version_negotation = "version negotation",
+    version_negotation = "version_negotation",
     unknown = "unknown",
 }
 
@@ -303,7 +320,7 @@ export interface IEventMetricUpdate {
 }
 
 export interface IEventPacketLost {
-    type:PacketType,
+    packet_type:PacketType,
     packet_number:string,
 
     // not all implementations will keep track of full packets, so these are optional
@@ -368,7 +385,7 @@ export interface IEventH3DataReceived {
 
 export interface IEventH3DependencyUpdate{
     stream_id:string,
-    type:"added" | "moved" | "removed",
+    update_type:"added" | "moved" | "removed",
 
     parent_id_old?:string,
     parent_id_new?:string,
@@ -516,6 +533,7 @@ export interface IMaxStreamDataFrame{
 export interface IMaxStreamsFrame{
     frame_type:QUICFrameTypeName.max_streams;
 
+    stream_type:"bidirectional" | "unidirectional";
     maximum:string;
 }
 
@@ -535,6 +553,7 @@ export interface IStreamDataBlockedFrame{
 export interface IStreamsBlockedFrame{
     frame_type:QUICFrameTypeName.streams_blocked;
 
+    stream_type:"bidirectional" | "unidirectional";
     limit:string;
 }
 
