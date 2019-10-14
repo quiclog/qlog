@@ -1032,7 +1032,7 @@ export enum QPACKInstructionTypeName {
     insert_count_increment = "insert_count_increment"
 }
 
-export enum QPACKHaderBlockPresentationTypeName {
+export enum QPACKHeaderBlockPresentationTypeName {
     indexed_header = "indexed_header",
     literal_with_name = "literal_with_name",
     literal_without_name = "literal_without_name",
@@ -1097,7 +1097,7 @@ export interface IQPACKInsertCountIncrementInstruction {
 export type QPACKHeaderBlockRepresentation = IQPACKIndexedHeaderField | IQPACKLiteralHeaderFieldWithName | IQPACKLiteralHeaderFieldWithoutName;
 
 export interface IQPACKIndexedHeaderField {    
-    header_field_type:QPACKHaderBlockPresentationTypeName.indexed_header,
+    header_field_type:QPACKHeaderBlockPresentationTypeName.indexed_header,
 
     table_type:"static"|"dynamic", // MUST be "dynamic" if is_post_base is true
     index:number,
@@ -1106,7 +1106,7 @@ export interface IQPACKIndexedHeaderField {
 }
 
 export interface IQPACKLiteralHeaderFieldWithName {
-    header_field_type:QPACKHaderBlockPresentationTypeName.literal_with_name,
+    header_field_type:QPACKHeaderBlockPresentationTypeName.literal_with_name,
 
     preserve_literal:boolean, // the 3rd "N" bit
     table_type:"static"|"dynamic", // MUST be "dynamic" if is_post_base is true
@@ -1120,7 +1120,7 @@ export interface IQPACKLiteralHeaderFieldWithName {
 }
 
 export interface IQPACKLiteralHeaderFieldWithoutName {
-    header_field_type:QPACKHaderBlockPresentationTypeName.literal_without_name,
+    header_field_type:QPACKHeaderBlockPresentationTypeName.literal_without_name,
 
     preserve_literal:boolean; // the 3rd "N" bit
 
