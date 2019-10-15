@@ -928,7 +928,6 @@ export interface IUnknownFrame{
 export enum HTTP3FrameTypeName {
     data = "data",
     headers = "headers",
-    priority = "priority",
     cancel_push = "cancel_push",
     settings = "settings",
     push_promise = "push_promise",
