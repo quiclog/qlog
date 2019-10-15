@@ -133,7 +133,7 @@ export enum SecurityEventType {
 
 export enum RecoveryEventType {
     parameters_set = "parameters_set",
-    metric_updated = "metric_updated",
+    metrics_updated = "metrics_updated",
     congestion_state_updated = "congestion_state_updated",
 
     loss_timer_set = "loss_timer_set",
