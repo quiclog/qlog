@@ -712,7 +712,7 @@ export enum QUICFrameTypeName {
     path_response = "path_response",
     connection_close = "connection_close",
     application_close = "application_close",
-    unknown_frame_type = "unkown_frame_type"
+    unknown_frame_type = "unknown_frame_type"
 }
 
 // TODO: potentially split in LongHeader and ShortHeader explicitly?
