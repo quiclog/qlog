@@ -1,5 +1,5 @@
 // ================================================================== //
-// Interface for QLog version draft-01, initial for quic draft-22, but should be more tied to qlog than quic versions now
+// Interface for QLog version draft-01, initial for quic draft-23, but should be more tied to qlog than quic versions now
 // ================================================================== //
 
 export interface IQLog {

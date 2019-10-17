@@ -39,10 +39,6 @@ export class EventTupleWrapper{
         return this.evt[2];
     }
 
-    public get trigger() : qlog.EventTrigger {
-        return this.evt[3];
-    }
-
     public get data() : qlog.EventData {
         return this.evt[4];
     }
@@ -50,8 +46,7 @@ export class EventTupleWrapper{
     public static time(evt:Array<any>)     : number {               return evt[0] }
     public static category(evt:Array<any>) : qlog.EventCategory {   return evt[1] }
     public static type(evt:Array<any>)     : qlog.EventType {       return evt[2] }
-    public static trigger(evt:Array<any>)  : qlog.EventTrigger {    return evt[3] }
-    public static data(evt:Array<any>)     : qlog.EventData {       return evt[4] }
+    public static data(evt:Array<any>)     : qlog.EventData {       return evt[3] }
 }
 
 export class QUtil {
