@@ -888,7 +888,7 @@ export interface IConnectionCloseFrame{
     frame_type:QUICFrameTypeName.connection_close;
 
     error_space:ErrorSpace;
-    error_code:TransportError | ApplicationError | number;
+    error_code:TransportError | ApplicationError | CryptoError | string | number;
     raw_error_code:number;
     reason:string;
 
