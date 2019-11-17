@@ -890,7 +890,7 @@ export interface IConnectionCloseFrame{
     error_space:ErrorSpace;
     error_code:TransportError | ApplicationError | CryptoError | string | number;
     raw_error_code:number;
-    reason:string;
+    reason:string; // hex
 
     trigger_frame_type?:number; // TODO: should be more defined, but we don't have a FrameType enum atm...
 }
