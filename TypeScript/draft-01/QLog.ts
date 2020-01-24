@@ -486,9 +486,7 @@ export enum HTTP3EventType {
     stream_type_set = "stream_type_set",
     frame_created = "frame_created",
     frame_parsed = "frame_parsed",
-    data_moved = "data_moved",
-    datagram_received = "data_received",
-    dependency_update = "dependency_update"
+    data_moved = "data_moved"
 }
 
 export interface IEventH3ParametersSet {
