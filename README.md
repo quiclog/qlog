@@ -1,4 +1,5 @@
-# qlog integrations
-This repository contains various programming language integrations and interface definitions for the qlog format.
+# qlog integrations and schemas
 
-For the main schema and format definitions, see the separate repository: https://github.com/quiclog/internet-drafts
+This repository contains various programming language integrations and interface schema definitions for the qlog format.
+
+For the main schema and per-protocol event definition documents, see the separate repository: https://github.com/quicwg/qlog
