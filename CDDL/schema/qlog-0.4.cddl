@@ -1,0 +1,178 @@
+; Reworked qlog entity definitions in CDDL
+; We keep them all together in a single big file for easy type-checking
+; and validator tool usage
+
+QlogFile = {
+    qlog_version: text
+    ? qlog_format: text .default "JSON"
+    ? title: text
+    ? description: text
+    ? summary: Summary
+    ? traces: [+ Trace / TraceError]
+}
+
+; CDDL doesn't define a default uint64 type
+; NOTE: this is below QlogFile here because otherwise the tooling
+; thinks uint64 is the root type instead of QlogFile...
+uint64 = uint .size 8
+; CDDL doesn't define a proper hex-string that's compatible with JSON
+; the "bytes" and "bstr" get serialized as h'1234ABCD',
+; which isn't valid JSON
+; TODO: FIXME: ask CDDL designers about this
+hexstring = text
+
+Summary = {
+    ; summary can contain any type of custom information
+    ; text here doesn't mean the type text, 
+    ; but the fact that keys/names in the objects are strings
+    * text => any
+}
+
+Configuration = {
+    ; time_offset is in milliseconds
+    time_offset: float64
+    original_uris:[* text]
+    * text => any
+}
+
+TraceError = {
+    error_description: text
+    ; the original URI at which we attempted to find the file
+    ? uri: text 
+    ? vantage_point: VantagePoint
+}
+
+VantagePoint = {
+    ? name: text
+    type: VantagePointType
+    ? flow: VantagePointType
+}
+
+; client = endpoint which initiates the connection
+; server = endpoint which accepts the connection
+; network = observer in between client and server
+VantagePointType = "client" / "server" / "network" / "unknown"
+
+
+
+Trace = {
+    ? title: text
+    ? description: text
+    ? configuration: Configuration
+    ? common_fields: CommonFields 
+    ? vantage_point: VantagePoint
+    events: [* Event]
+
+    DEBUG_VALIDATION: ValidationAggregator
+}
+
+CommonFields = {
+    ? time_format: TimeFormat
+    ? reference_time: float64
+
+    ? protocol_type: ProtocolType
+    ? group_id: GroupID
+
+    * text => any
+}
+
+TimeFormat = "absolute" / "delta" / "relative"
+
+
+
+
+
+ProtocolType = [+ text]
+GroupID = text / uint
+
+Event = {
+    time: float64
+    name: text
+    data: $ProtocolEventBody
+
+    ? time_format: TimeFormat
+
+    ? protocol_type: ProtocolType
+    ? group_id: GroupID
+
+    ; events can contain any amount of custom fields
+    * text => any
+}
+
+; The ProtocolEventBody is any key-value map (e.g., JSON object)
+; only the optional trigger field is defined in this document
+$ProtocolEventBody /= {
+    ? trigger: text
+    * text => any
+}
+; event documents are intended to extend this socket by using:
+; NewProtocolSpecificEvents = EventType1 / EventType2 / ... / EventTypeN
+; $protocolEventBody /= NewProtocolSpecificEvents
+
+RawInfo = {
+    ; the full byte length of the entity (e.g., packet or frame), 
+    ; including headers and trailers
+    ? length: uint64
+    ; the byte length of the entity's payload, 
+    ; without headers or trailers
+    ? payload_length: uint64
+
+    ; the contents of the full entity, 
+    ; including headers and trailers
+    data: hexstring
+}
+
+GenericError = {
+    ? code: uint
+    ? message: text
+}
+
+GenericWarning = {
+    ? code: uint
+    ? message: text
+}
+
+GenericInfo = {
+    message: text
+}
+
+GenericDebug = {
+    message: text
+}
+
+GenericVerbose = {
+    message: text
+}
+
+SimulationScenario = {
+    ? name: text
+    ? details: {* text => any }
+}
+
+SimulationMarker = {
+    ? type: text
+    ? message: text
+}
+
+; CDDL tooling does not validate unused rules
+; so we need to somehow enforce them being checked by including
+; them in a top-level entitiy
+; this is PURELY for debugging/validation purposes!
+ValidationAggregator = {
+    rawInfo: RawInfo,
+    
+    ge: GenericError
+    gw: GenericWarning
+    gi: GenericInfo
+    gd: GenericDebug
+    gv: GenericVerbose
+    ss: SimulationScenario
+    sm: SimulationMarker
+}
+
+; -----------------------------------------------------------------
+; END OF MAIN QLOG SPEC
+; START OF QUIC EVENTS SPEC
+; -----------------------------------------------------------------
+
+
