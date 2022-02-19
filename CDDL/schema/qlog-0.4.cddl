@@ -83,7 +83,7 @@ TimeFormat = "absolute" / "delta" / "relative"
 
 
 ProtocolType = [+ text]
-GroupID = text / uint
+GroupID = text
 
 Event = {
     time: float64
@@ -152,6 +152,24 @@ SimulationScenario = {
 SimulationMarker = {
     ? type: text
     ? message: text
+}
+
+TraceSeq = {
+    ? title: text
+    ? description: text
+    ? configuration: Configuration
+    ? common_fields: CommonFields 
+    ? vantage_point: VantagePoint
+}
+
+QlogFileSeq = {
+    qlog_format: "JSON-SEQ"
+
+    qlog_version: text
+    ? title: text
+    ? description: text
+    ? summary: Summary
+    trace: TraceSeq
 }
 
 ; CDDL tooling does not validate unused rules

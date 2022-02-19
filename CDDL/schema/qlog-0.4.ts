@@ -8,7 +8,7 @@ class QlogFile {
     title?:string,
     description?:string,
     summary?: Summary,
-    traces: array<Trace|TraceError>
+    traces: Array<Trace|TraceError>
 }
 
 
@@ -90,6 +90,7 @@ class Event {
     name: string,
     data: any,
 
+
     time_format?: TimeFormat,
 
     protocol_type?: ProtocolType,
@@ -98,7 +99,6 @@ class Event {
     // list of fields with any type
 
 }
-
 
 
 
@@ -152,6 +152,24 @@ class RawInfo {
 {
     type?:string,
     message?:string
+}
+
+class TraceSeq {
+    title?: string,
+    description?: string,
+    configuration?: Configuration,
+    common_fields?: CommonFields,
+    vantage_point: VantagePoint
+}
+
+class QlogFileSeq {
+    qlog_format: "JSON-SEQ",
+
+    qlog_version:string,
+    title?:string,
+    description?:string,
+    summary?: Summary,
+    trace: TraceSeq
 }
 
 
