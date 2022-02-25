@@ -1,0 +1,380 @@
+HTTPValidationAggregator = {
+    hexstring_: hexstring
+    unknownframe_: UnknownFrame
+    rawinfo_: RawInfo
+    httpparametersset_: HTTPParametersSet
+    httpparametersrestored_: HTTPParametersRestored
+    httpstreamtypeset_: HTTPStreamTypeSet
+    httpstreamtype_: HTTPStreamType
+    httpframecreated_: HTTPFrameCreated
+    httpframeparsed_: HTTPFrameParsed
+    httppushresolved_: HTTPPushResolved
+    httppushresolveddecision_: HTTPPushResolvedDecision
+    qpackstateupdate_: QPACKStateUpdate
+    qpackstreamstateupdate_: QPACKStreamStateUpdate
+    qpackstreamstate_: QPACKStreamState
+    qpackdynamictableupdate_: QPACKDynamicTableUpdate
+    qpackdynamictableupdatetype_: QPACKDynamicTableUpdateType
+    qpackdynamictableentry_: QPACKDynamicTableEntry
+    qpackheadersencoded_: QPACKHeadersEncoded
+    qpackheadersdecoded_: QPACKHeadersDecoded
+    qpackinstructioncreated_: QPACKInstructionCreated
+    qpackinstructionparsed_: QPACKInstructionParsed
+    httpframe_: HTTPFrame
+    httpdataframe_: HTTPDataFrame
+    httpheadersframe_: HTTPHeadersFrame
+    httpheader_: HTTPHeader
+    httpcancelpushframe_: HTTPCancelPushFrame
+    httpsettingsframe_: HTTPSettingsFrame
+    httpsettings_: HTTPSettings
+    httppushpromiseframe_: HTTPPushPromiseFrame
+    httpgoawayframe_: HTTPGoawayFrame
+    httpmaxpushidframe_: HTTPMaxPushIDFrame
+    httpreservedframe_: HTTPReservedFrame
+    httpapplicationerror_: HTTPApplicationError
+    qpackinstruction_: QPACKInstruction
+    setdynamictablecapacityinstruction_: SetDynamicTableCapacityInstruction
+    insertwithnamereferenceinstruction_: InsertWithNameReferenceInstruction
+    insertwithoutnamereferenceinstruction_: InsertWithoutNameReferenceInstruction
+    duplicateinstruction_: DuplicateInstruction
+    sectionacknowledgementinstruction_: SectionAcknowledgementInstruction
+    streamcancellationinstruction_: StreamCancellationInstruction
+    insertcountincrementinstruction_: InsertCountIncrementInstruction
+    qpackheaderblockrepresentation_: QPACKHeaderBlockRepresentation
+    indexedheaderfield_: IndexedHeaderField
+    literalheaderfieldwithname_: LiteralHeaderFieldWithName
+    literalheaderfieldwithoutname_: LiteralHeaderFieldWithoutName
+    qpackheaderblockprefix_: QPACKHeaderBlockPrefix
+    ownertype_: OwnerType
+    qpacktabletype_: QPACKTableType
+}
+
+uint64 = uint .size 8
+hexstring = text
+
+UnknownFrame = {
+    frame_type: text .default "unknown"
+    raw_frame_type: uint64
+    ? raw_length: uint
+    ? raw: RawInfo
+}
+
+RawInfo = {
+    ? length: uint64
+    ? payload_length: uint64
+    data: hexstring
+}
+
+HTTPParametersSet = {
+    ? owner: OwnerType
+    ; MAX_HEADER_LIST_SIZE
+    ? max_header_list_size: uint64
+    ; QPACK_MAX_TABLE_CAPACITY
+    ? max_table_capacity: uint64
+    ; QPACK_BLOCKED_STREAMS
+    ? blocked_streams_count: uint64
+    ; additional settings for grease and extensions
+    * text => uint64
+    ; indicates whether this implementation waits for a SETTINGS
+    ; frame before processing requests
+    ? waits_for_settings: bool
+}
+
+HTTPParametersRestored = {
+    ? max_header_list_size: uint64
+    ; QPACK_MAX_TABLE_CAPACITY
+    ? max_table_capacity: uint64
+    ; QPACK_BLOCKED_STREAMS
+    ? blocked_streams_count: uint64
+    ; additional settings for grease and extensions
+    * text => uint64
+}
+
+HTTPStreamTypeSet = {
+    ? owner: OwnerType
+    stream_id: uint64
+    ? old: HTTPStreamType
+    new: HTTPStreamType
+    ; only when new == "push"
+    ? associated_push_id: uint64
+}
+
+HTTPStreamType = ("data" /
+                  "control" /
+                  "push" /
+                  "reserved" /
+                  "qpack_encode" /
+                  "qpack_decode")
+
+HTTPFrameCreated = {
+    stream_id: uint64
+    ? length: uint64
+    frame: HTTPFrame
+    ? raw: RawInfo
+}
+
+HTTPFrameParsed = {
+    stream_id: uint64
+    ? length: uint64
+    frame: HTTPFrame
+    ? raw: RawInfo
+}
+
+HTTPPushResolved = {
+    ? push_id: uint64
+    ; in case this is logged from a place that does not have access
+    ; to the push_id
+    ? stream_id: uint64
+    decision: HTTPPushResolvedDecision
+}
+
+HTTPPushResolvedDecision = "claimed" / "abandoned"
+
+QPACKStateUpdate = {
+    owner: OwnerType
+    ? dynamic_table_capacity: uint64
+    ; effective current size, sum of all the entries
+    ? dynamic_table_size: uint64
+    ? known_received_count: uint64
+    ? current_insert_count: uint64
+}
+
+QPACKStreamStateUpdate = {
+    stream_id: uint64
+    ; streams are assumed to start "unblocked" until they become
+    ; "blocked"
+    state: QPACKStreamState
+}
+
+QPACKStreamState = "blocked" / "unblocked"
+
+QPACKDynamicTableUpdate = {
+    ; local = the encoder's dynamic table
+    ; remote = the decoder's dynamic table
+    owner: OwnerType
+    update_type: QPACKDynamicTableUpdateType
+    entries: [+ QPACKDynamicTableEntry]
+}
+
+QPACKDynamicTableUpdateType = "inserted" / "evicted"
+
+QPACKDynamicTableEntry = {
+    index: uint64
+    ? name: text / hexstring
+    ? value: text / hexstring
+}
+
+QPACKHeadersEncoded = {
+    ? stream_id: uint64
+    ? headers: [+ HTTPHeader]
+    block_prefix: QPACKHeaderBlockPrefix
+    header_block: [+ QPACKHeaderBlockRepresentation]
+    ? length: uint
+    ? raw: hexstring
+}
+
+QPACKHeadersDecoded = {
+    ? stream_id: uint64
+    ? headers: [+ HTTPHeader]
+    block_prefix: QPACKHeaderBlockPrefix
+    header_block: [+ QPACKHeaderBlockRepresentation]
+    ? length: uint
+    ? raw: hexstring
+}
+
+QPACKInstructionCreated = {
+    ; see definition in appendix
+    instruction: QPACKInstruction
+    ? length: uint
+    ? raw: hexstring
+}
+
+QPACKInstructionParsed = {
+    ; see definition in appendix
+    instruction: QPACKInstruction
+    ? length: uint
+    ? raw: hexstring
+}
+
+HTTPFrame = (HTTPDataFrame /
+             HTTPHeadersFrame /
+             HTTPCancelPushFrame /
+             HTTPSettingsFrame /
+             HTTPPushPromiseFrame /
+             HTTPGoawayFrame /
+             HTTPMaxPushIDFrame /
+             HTTPReservedFrame /
+             UnknownFrame)
+
+HTTPDataFrame = {
+    frame_type: "data"
+    ? raw: hexstring
+}
+
+HTTPHeadersFrame = {
+    frame_type: "headers"
+    headers: [* HTTPHeader]
+}
+
+HTTPHeader = {
+    name: text
+    value: text
+}
+
+HTTPCancelPushFrame = {
+    frame_type: "cancel_push"
+    push_id: uint64
+}
+
+HTTPSettingsFrame = {
+    frame_type: "settings"
+    settings: [* HTTPSettings]
+}
+
+HTTPSettings = {
+    name: text
+    value: text
+}
+
+HTTPPushPromiseFrame = {
+    frame_type: "push_promise"
+    push_id: uint64
+    headers: [* HTTPHeader]
+}
+
+HTTPGoawayFrame = {
+    frame_type: "goaway"
+    ; Either stream_id or push_id.
+    ; This is implicit from the sender of the frame
+    id: uint64
+}
+
+HTTPMaxPushIDFrame = {
+    frame_type: "max_push_id"
+    push_id: uint64
+}
+
+HTTPReservedFrame = {
+    frame_type: "reserved"
+    length: uint64
+}
+
+HTTPApplicationError = ("http_no_error" /
+                        "http_general_protocol_error" /
+                        "http_internal_error" /
+                        "http_stream_creation_error" /
+                        "http_closed_critical_stream" /
+                        "http_frame_unexpected" /
+                        "http_frame_error" /
+                        "http_excessive_load" /
+                        "http_id_error" /
+                        "http_settings_error" /
+                        "http_missing_settings" /
+                        "http_request_rejected" /
+                        "http_request_cancelled" /
+                        "http_request_incomplete" /
+                        "http_early_response" /
+                        "http_connect_error" /
+                        "http_version_fallback")
+
+QPACKInstruction = (SetDynamicTableCapacityInstruction /
+                    InsertWithNameReferenceInstruction /
+                    InsertWithoutNameReferenceInstruction /
+                    DuplicateInstruction /
+                    SectionAcknowledgementInstruction /
+                    StreamCancellationInstruction /
+                    InsertCountIncrementInstruction)
+
+SetDynamicTableCapacityInstruction = {
+    instruction_type: "set_dynamic_table_capacity"
+    capacity: uint
+}
+
+InsertWithNameReferenceInstruction = {
+    instruction_type: "insert_with_name_reference"
+    table_type: QPACKTableType
+    name_index: uint
+    huffman_encoded_value: bool
+    ? value_length: uint
+    ? value: text
+}
+
+InsertWithoutNameReferenceInstruction = {
+    instruction_type: "insert_without_name_reference"
+    huffman_encoded_name: bool
+    ? name_length: uint
+    ? name: text
+    huffman_encoded_value: bool
+    ? value_length: uint
+    ? value: text
+}
+
+DuplicateInstruction = {
+    instruction_type: "duplicate"
+    index: uint
+}
+
+SectionAcknowledgementInstruction = {
+    instruction_type: "section_acknowledgement"
+    stream_id: uint64
+}
+
+StreamCancellationInstruction = {
+    instruction_type: "stream_cancellation"
+    stream_id: uint64
+}
+
+InsertCountIncrementInstruction = {
+    instruction_type: "insert_count_increment"
+    increment: uint
+}
+
+QPACKHeaderBlockRepresentation = (IndexedHeaderField /
+                                  LiteralHeaderFieldWithName /
+                                  LiteralHeaderFieldWithoutName)
+
+IndexedHeaderField = {
+    header_field_type: "indexed_header"
+    ; MUST be "dynamic" if is_post_base is true
+    table_type: QPACKTableType
+    index: uint
+    ; to represent the "indexed header field with post-base index"
+    ; header field type
+    is_post_base: bool .default false
+}
+
+LiteralHeaderFieldWithName = {
+    header_field_type: "literal_with_name";
+    ; the 3rd "N" bit
+    preserve_literal: bool
+    ; MUST be "dynamic" if is_post_base is true
+    table_type: QPACKTableType
+    name_index: uint
+    huffman_encoded_value: bool
+    ? value_length: uint
+    ? value: text
+    ; to represent the "indexed header field with post-base index"
+    ; header field type
+    is_post_base: bool .default false
+}
+
+LiteralHeaderFieldWithoutName = {
+    header_field_type: "literal_without_name";
+    ; the 3rd "N" bit
+    preserve_literal: bool
+    huffman_encoded_name: bool
+    ? name_length: uint
+    ? name: text
+    huffman_encoded_value: bool
+    ? value_length: uint
+    ? value: text
+}
+
+QPACKHeaderBlockPrefix = {
+    required_insert_count: uint
+    sign_bit: bool
+    delta_base: uint
+}
+
+OwnerType = "local" / "remote"
+QPACKTableType = "static" / "dynamic"
